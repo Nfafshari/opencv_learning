@@ -1,0 +1,3 @@
+from lessons import lesson_01_basics, lesson_02_image_fundamentals_and_manipulation
+
+LESSONS = (lesson_01_basics.LESSON, lesson_02_image_fundamentals_and_manipulation.LESSON)

@@ -1,7 +1,8 @@
 import cv2
 from utils.safe_imread import safe_imread
+from lessons.base import Lesson
 
-def run():
+def run() -> None:
     '''
     openCV basic usage for reading, resizing, rotating, and saving an image.
 
@@ -28,6 +29,12 @@ def run():
     # close windows
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+LESSON = Lesson(
+    title="Lesson 01 - OpenCV Basics",
+    summary="Resize, Rotate, and Save images",
+    run=run
+)
 
 if __name__ == "__main__":
     run()
