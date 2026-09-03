@@ -14,7 +14,7 @@ while True:
     width = int(cap.get(3))
     height = int(cap.get(4))
 
-    # capture a frame
+    # create a blank image
     image = np.zeros(frame.shape, np.uint8)
 
     # Resize the frame so that we can copy and paste it 4 times
