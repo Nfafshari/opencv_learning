@@ -5,7 +5,7 @@ img = cv2.imread('images/pattern_chessboard.png')
 
 # guard against unknown image paths, which results in img = None
 if img is None:
-    raise FileNotFoundError('Could not read images/camera_man_w_noise.jpg')
+    raise FileNotFoundError('Could not read image')
 
 img = cv2.resize(img, (0,0), fx=0.5, fy=0.5)
 
