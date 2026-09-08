@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
 
-# read all images, these are the same ones that were segmented in the thresholding problem
-coins_1_img = cv2.imread('images/coins1.jpg', 0)
-coins_2_img = cv2.imread('images/coins2.jpg', 0)
-screws_img = cv2.imread('images/screws.jpeg', 0)
+# read all images
+camera_man_img = cv2.imread('images/camera_man_w_noise.jpg', 0)
+salt_and_pepper_img = cv2.imread('images/SaltAndPepperNoise.jpg', 0)
+gaussian_noise_img = cv2.imread('images/GaussianNoise.jpg', 0)
+uniform_noise_img = cv2.imread('images/UniformNoise.jpg', 0)
 
 # masks (structuring elements) to run every operation with
 kernel_3x3 = np.ones((3, 3), np.uint8)
@@ -14,7 +15,7 @@ kernel_5x5 = np.ones((5, 5), np.uint8)
 background_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (61, 61))
 
 # morphology on the segmented images from the thresholding problem
-for img in (coins_1_img, coins_2_img, screws_img):
+for img in (camera_man_img, salt_and_pepper_img, gaussian_noise_img, uniform_noise_img):
     # guard against unknown image paths, which results in img = None
     if img is None:
         raise FileNotFoundError('Could not read image')
