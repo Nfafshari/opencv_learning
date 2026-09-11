@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opencv-learning"
+version = "0.1.0"
+description = "A personal sandbox for learning the basics of OpenCV and machine vision."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.0",
+    "opencv-python>=4.10",
+    "textual>=1.0",
+]
+
+[tool.setuptools]
+packages = ["lessons", "utils", "widgets"]

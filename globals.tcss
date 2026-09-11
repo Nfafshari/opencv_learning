@@ -1,0 +1,68 @@
+/* Header and Footer dock themselves to the top and bottom, so #body is the
+   only child left in Screen's normal layout flow. */
+#body {
+    height: 1fr;
+}
+
+#lesson-section {
+    height: 1fr;
+    width: 34;
+    border: solid green;
+}
+
+#lessons-title {
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+#lesson-list {
+    width: 32;
+}
+
+#lesson-list>LessonItem>Label {
+    width: 95%;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    padding: 1 0 1 0
+}
+
+#detail {
+    width: 1fr;
+}
+
+/* The image pane gets the larger share - half blocks mean two pixel rows per
+   cell, so vertical space is what limits how much detail is visible. */
+#preview-pane {
+    height: 3fr;
+    border: solid green;
+}
+
+#preview-title {
+    height: 1;
+    padding: 0 1;
+}
+
+#image {
+    height: 1fr;
+}
+
+#preview-caption {
+    height: auto;
+    max-height: 2;
+    padding: 0 1;
+}
+
+#concepts-pane {
+    height: 2fr;
+    border: solid green;
+    padding: 0 1;
+}
+
+/* Toggled by the "f" binding: hand the whole column to the image. */
+#detail.image-only #concepts-pane {
+    display: none;
+}
+
+#detail.image-only #preview-pane {
+    height: 1fr;
+}
