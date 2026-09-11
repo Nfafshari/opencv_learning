@@ -36,4 +36,4 @@ python 1_opencv_basics.py
 
 >[!NOTE]
 > All credit to **Tech With Tim** on YouTube who made great video tutorials about openCV.
-> This repo is for me to learn OpenCV better and practice with some fun small project.
+> This repo is for me to learn OpenCV better and practice with some fun small projects.
