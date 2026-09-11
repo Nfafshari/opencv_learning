@@ -51,6 +51,13 @@ def calibrate_camera(pathname: Path, obj_points, img_points, dataset_size: int):
             corners2 = cv2.cornerSubPix(gray_img, corners, (11, 11), (-1, -1), criteria)
             img_points.append(corners2)
 
+            # draw the refined corners onto a copy so the original stays clean
+            preview = img.copy()
+            cv2.drawChessboardCorners(preview, (7, 7), corners2, ret)
+            cv2.imshow("image", preview)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
             # increment dataset counter
             i += 1
 
