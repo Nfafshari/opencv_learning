@@ -30,14 +30,39 @@
     width: 1fr;
 }
 
-#summary {
-    height: 0.25fr;
+/* The image pane gets the larger share - half blocks mean two pixel rows per
+   cell, so vertical space is what limits how much detail is visible. */
+#preview-pane {
+    height: 3fr;
     border: solid green;
-    padding: 1 2;
 }
 
-#log {
+#preview-title {
+    height: 1;
+    padding: 0 1;
+}
+
+#image {
     height: 1fr;
+}
+
+#preview-caption {
+    height: auto;
+    max-height: 2;
+    padding: 0 1;
+}
+
+#concepts-pane {
+    height: 2fr;
     border: solid green;
     padding: 0 1;
+}
+
+/* Toggled by the "f" binding: hand the whole column to the image. */
+#detail.image-only #concepts-pane {
+    display: none;
+}
+
+#detail.image-only #preview-pane {
+    height: 1fr;
 }

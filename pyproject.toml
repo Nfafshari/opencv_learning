@@ -11,7 +11,8 @@ requires-python = ">=3.10"
 dependencies = [
     "numpy>=2.0",
     "opencv-python>=4.10",
+    "textual>=1.0",
 ]
 
 [tool.setuptools]
-packages = ["lessons", "utils"]
+packages = ["lessons", "utils", "widgets"]
