@@ -10,7 +10,7 @@ A personal sandbox for learning the basics of **OpenCV** and **machine vision**.
   Each exposes a `LESSON` with its notes and still previews, plus a `run()` that
   opens the real OpenCV windows.
 - `projects/` - small end-to-end projects (noise filtering, thresholding,
-  morphology, camera calibration).
+  morphology, camera calibration, feature detector comparison).
 - `images/` - sample images: noise variants (Gaussian, salt & pepper, uniform),
   coins, screws, chessboards, and koala.
 - `utils/terminal_image.py` - draws an OpenCV image as colored half blocks so it
