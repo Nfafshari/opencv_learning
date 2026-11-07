@@ -2,11 +2,8 @@ import cv2
 import numpy as np
 import glob
 import os
-import re
 
-# photos of the marker, taken in order while the camera slides along a tape measure.
-# put the tape reading in each file name so the program can check itself, e.g.
-#   00_0cm.jpeg, 01_5cm.jpeg, 02_10cm.jpeg ... 06_30cm.jpeg
+# photos of the marker, in file name order, taken while the camera slides along a tape measure
 FOLDER = 'images/hw4'
 OUT = 'images/hw4_results'
 
@@ -74,7 +71,7 @@ def calibrate():
 
 
 def load_frames(calib_size):
-    ''' the marker photos in file name order, with the tape reading if the name has one '''
+    ''' the marker photos in file name order '''
     paths = sorted(glob.glob(os.path.join(FOLDER, '*.jp*g')) + glob.glob(os.path.join(FOLDER, '*.png')))
     if len(paths) < 2:
         raise ValueError(f'*ERROR - need at least 2 images in {FOLDER}, found {len(paths)}')
@@ -93,10 +90,7 @@ def load_frames(calib_size):
         if (w, h) != calib_size:
             img = cv2.resize(img, calib_size, interpolation=cv2.INTER_AREA)
 
-        name = os.path.splitext(os.path.basename(path))[0]
-        match = re.search(r'(\d+(?:\.\d+)?)cm', name)
-        tape_cm = float(match.group(1)) if match else None
-        frames.append((name, img, tape_cm))
+        frames.append((os.path.splitext(os.path.basename(path))[0], img))
 
     return frames
 
@@ -110,11 +104,10 @@ def marker_corners_3d():
 
 
 def marker_pose(img, detector, K, dist):
-    ''' 4x4 transform that takes marker coordinates into camera coordinates,
-        plus the reprojection error so a bad detection is easy to spot '''
+    ''' 4x4 transform that takes marker coordinates into camera coordinates '''
     corners, ids, _ = detector.detectMarkers(img)
     if ids is None or MARKER_ID not in ids.flatten():
-        return None, None, None
+        return None, None
 
     idx = list(ids.flatten()).index(MARKER_ID)
     image_pts = corners[idx].reshape(4, 2)
@@ -123,20 +116,12 @@ def marker_pose(img, detector, K, dist):
     # IPPE_SQUARE is the solver made for a single square marker
     ok, rvec, tvec = cv2.solvePnP(object_pts, image_pts, K, dist, flags=cv2.SOLVEPNP_IPPE_SQUARE)
     if not ok:
-        return None, None, None
-
-    projected, _ = cv2.projectPoints(object_pts, rvec, tvec, K, dist)
-    error = np.sqrt(np.mean(np.sum((projected.reshape(4, 2) - image_pts) ** 2, axis=1)))
+        return None, None
 
     T = np.eye(4)
     T[:3, :3], _ = cv2.Rodrigues(rvec)
     T[:3, 3] = tvec.ravel()
-    return T, (corners[idx], ids[idx:idx + 1], rvec, tvec), error
-
-
-def rotation_deg(R):
-    ''' angle of a rotation matrix, in degrees '''
-    return np.degrees(np.linalg.norm(cv2.Rodrigues(R)[0]))
+    return T, (corners[idx], ids[idx:idx + 1], rvec, tvec)
 
 
 def annotate(img, detection, K, dist, lines):
@@ -211,13 +196,12 @@ def main():
     detector = cv2.aruco.ArucoDetector(cv2.aruco.getPredefinedDictionary(DICTIONARY), params)
 
     results = []
-    for name, img, tape_cm in frames:
-        T_cm, detection, error = marker_pose(img, detector, K, dist)
+    for name, img in frames:
+        T_cm, detection = marker_pose(img, detector, K, dist)
         if T_cm is None:
             print(f'{name}: marker {MARKER_ID} not found, skipped')
             continue
-        results.append({'name': name, 'img': img, 'tape_cm': tape_cm,
-                        'T_cm': T_cm, 'detection': detection, 'error': error})
+        results.append({'name': name, 'img': img, 'T_cm': T_cm, 'detection': detection})
 
     if len(results) < 2:
         raise ValueError('*ERROR - the marker was found in fewer than 2 frames')
@@ -226,33 +210,21 @@ def main():
     #   camera_i -> marker -> camera_0   gives   T_0i = T_0m @ inv(T_im)
     # its translation is where camera i sits, in the first camera's x right / y down / z forward
     T_0m = results[0]['T_cm']
-    tape_0 = results[0]['tape_cm']
     for r in results:
-        T_0i = T_0m @ np.linalg.inv(r['T_cm'])
-        r['motion'] = T_0i[:3, 3]
-        r['turn_deg'] = rotation_deg(T_0i[:3, :3])
+        r['motion'] = (T_0m @ np.linalg.inv(r['T_cm']))[:3, 3]
 
-    header = f'{"frame":<14}{"dx cm":>8}{"dy cm":>8}{"dz cm":>8}{"|d| cm":>9}{"tape cm":>9}{"diff cm":>9}{"turn deg":>9}{"range cm":>10}{"reproj px":>11}'
+    header = f'{"frame":<14}{"dx cm":>8}{"dy cm":>8}{"dz cm":>8}{"|d| cm":>9}'
     print(header)
     print('-' * len(header))
 
     for i, r in enumerate(results):
         d = r['motion'] * 100
         moved = np.linalg.norm(d)
-        distance = np.linalg.norm(r['T_cm'][:3, 3]) * 100
-
-        expected = None
-        if r['tape_cm'] is not None and tape_0 is not None:
-            expected = abs(r['tape_cm'] - tape_0)
-
-        tape_txt = f'{expected:9.1f}{moved - expected:+9.1f}' if expected is not None else f'{"-":>9}{"-":>9}'
-        print(f'{r["name"]:<14}{d[0]:8.1f}{d[1]:8.1f}{d[2]:8.1f}{moved:9.1f}{tape_txt}'
-              f'{r["turn_deg"]:9.1f}{distance:10.1f}{r["error"]:11.2f}')
+        print(f'{r["name"]:<14}{d[0]:8.1f}{d[1]:8.1f}{d[2]:8.1f}{moved:9.1f}')
 
         lines = [f'frame {i}: {r["name"]}',
                  f'camera move from frame 0: x {d[0]:+.1f}  y {d[1]:+.1f}  z {d[2]:+.1f} cm',
-                 f'total {moved:.1f} cm' + (f'  (tape {expected:.1f} cm, diff {moved - expected:+.1f})' if expected is not None else ''),
-                 f'rotation {r["turn_deg"]:.1f} deg   marker range {distance:.1f} cm']
+                 f'total {moved:.1f} cm']
         show(f'frame_{i:02d}_{r["name"]}', annotate(r['img'], r['detection'], K, dist, lines))
 
     show('trajectory_top_down', top_down_plot(results))
